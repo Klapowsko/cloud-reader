@@ -1,0 +1,34 @@
+# Binários
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+cloud-reader
+backend
+
+# Arquivos de teste
+*.test
+*.out
+
+# Dependências
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Variáveis de ambiente
+.env
+.env.local
+
