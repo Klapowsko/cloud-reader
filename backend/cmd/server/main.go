@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"cloud-reader/backend/internal/auth/domain"
+	authHttp "cloud-reader/backend/internal/auth/infrastructure/http"
 	"cloud-reader/backend/internal/shared/database"
 	"cloud-reader/backend/internal/shared/middleware"
 	"cloud-reader/backend/internal/wire"
@@ -46,13 +47,9 @@ func main() {
 	{
 		api.GET("/", welcome)
 
-		// Rotas de autenticação
+		// Registra rotas de autenticação
 		authHandler := wire.InitializeAuthHandler(db)
-		auth := api.Group("/auth")
-		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
-		}
+		authHttp.RegisterRoutes(api, authHandler)
 	}
 
 	// Inicia o servidor
