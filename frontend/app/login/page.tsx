@@ -1,12 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { loginUser, type LoginRequest } from '@/lib/api'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ 
+    email?: string
+    password?: string
+    general?: string
+  }>({})
   const [isLoading, setIsLoading] = useState(false)
 
   const validateEmail = (email: string): boolean => {
@@ -34,11 +41,32 @@ export default function LoginPage() {
 
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true)
-      // Simulação de loading (sem integração backend ainda)
-      setTimeout(() => {
+      try {
+        const loginData: LoginRequest = {
+          email: email.trim(),
+          password,
+        }
+
+        const response = await loginUser(loginData)
+        
+        // TODO: Salvar token no localStorage ou cookie quando JWT for implementado
+        // if (response.token) {
+        //   localStorage.setItem('token', response.token)
+        // }
+        
+        // Redireciona para a home após login bem-sucedido
+        router.push('/')
+      } catch (error) {
         setIsLoading(false)
-        console.log('Login:', { email, password })
-      }, 1000)
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login'
+        
+        // Verifica se é erro de credenciais
+        if (errorMessage.includes('credenciais') || errorMessage.includes('inválidas')) {
+          setErrors({ general: 'Email ou senha incorretos' })
+        } else {
+          setErrors({ general: errorMessage })
+        }
+      }
     }
   }
 
@@ -66,6 +94,13 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="px-8 py-8">
+            {errors.general && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <span>⚠</span> {errors.general}
+                </p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email field */}
               <div>

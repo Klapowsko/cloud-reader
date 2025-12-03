@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { registerUser, type RegisterRequest } from '@/lib/api'
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +16,7 @@ export default function RegisterPage() {
     email?: string
     password?: string
     confirmPassword?: string
+    general?: string
   }>({})
   const [isLoading, setIsLoading] = useState(false)
 
@@ -56,11 +60,28 @@ export default function RegisterPage() {
 
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true)
-      // Simulação de loading (sem integração backend ainda)
-      setTimeout(() => {
+      try {
+        const registerData: RegisterRequest = {
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }
+
+        await registerUser(registerData)
+        
+        // Redireciona para a home após cadastro bem-sucedido
+        router.push('/')
+      } catch (error) {
         setIsLoading(false)
-        console.log('Registro:', { name, email, password })
-      }, 1000)
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao criar conta'
+        
+        // Verifica se é erro de email duplicado
+        if (errorMessage.includes('email') || errorMessage.includes('já está em uso')) {
+          setErrors({ email: 'Este email já está cadastrado' })
+        } else {
+          setErrors({ general: errorMessage })
+        }
+      }
     }
   }
 
@@ -88,6 +109,13 @@ export default function RegisterPage() {
 
           {/* Form */}
           <div className="px-8 py-8">
+            {errors.general && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <span>⚠</span> {errors.general}
+                </p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name field */}
               <div>
