@@ -4,8 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"cloud-reader/backend/internal/auth/domain"
+	authDomain "cloud-reader/backend/internal/auth/domain"
 	authHttp "cloud-reader/backend/internal/auth/infrastructure/http"
+	bookDomain "cloud-reader/backend/internal/books/domain"
+	bookHttp "cloud-reader/backend/internal/books/infrastructure/http"
 	"cloud-reader/backend/internal/shared/database"
 	"cloud-reader/backend/internal/shared/middleware"
 	"cloud-reader/backend/internal/wire"
@@ -26,7 +28,7 @@ func main() {
 	defer database.Close()
 
 	// Executa migrations automáticas (cria tabelas se não existirem)
-	if err := db.AutoMigrate(&domain.User{}); err != nil {
+	if err := db.AutoMigrate(&authDomain.User{}, &bookDomain.Book{}); err != nil {
 		log.Printf("Aviso: Erro ao executar migrations: %v", err)
 	} else {
 		log.Println("Migrations executadas com sucesso")
@@ -50,6 +52,10 @@ func main() {
 		// Registra rotas de autenticação
 		authHandler := wire.InitializeAuthHandler(db)
 		authHttp.RegisterRoutes(api, authHandler)
+
+		// Registra rotas de livros
+		bookHandler := wire.InitializeBookHandler(db)
+		bookHttp.RegisterRoutes(api, bookHandler)
 	}
 
 	// Inicia o servidor
