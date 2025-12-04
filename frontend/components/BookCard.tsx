@@ -81,16 +81,18 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       <div className="flex items-start justify-between">
-        <div className="flex items-start gap-4 flex-1">
-          <div className="text-4xl">{getFormatIcon(book.format)}</div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">
+        <div className="flex items-start gap-4 flex-1 min-w-0">
+          <div className="text-4xl flex-shrink-0">{getFormatIcon(book.format)}</div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate" title={book.title}>
               {book.title}
             </h3>
-            <p className="text-sm text-gray-500 mb-2">{book.filename}</p>
-            <div className="flex items-center gap-4 text-xs text-gray-400">
+            <p className="text-sm text-gray-500 mb-2 truncate" title={book.filename}>
+              {book.filename}
+            </p>
+            <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
               <span>{formatFileSize(book.file_size)}</span>
               <span>•</span>
               <span>{book.format.toUpperCase()}</span>

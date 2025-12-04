@@ -83,4 +83,3 @@ func (c *Config) Log() {
 	log.Printf("  Server Port: %s", c.ServerPort)
 	log.Printf("  Environment: %s", c.Environment)
 }
-
