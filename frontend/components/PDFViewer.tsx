@@ -42,6 +42,8 @@ export default function PDFViewer({
   const [isLoading, setIsLoading] = useState(true)
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showOutline, setShowOutline] = useState(false)
+  const [outline, setOutline] = useState<any[]>([])
 
   // Carregar PDF
   useEffect(() => {
@@ -153,6 +155,15 @@ export default function PDFViewer({
         setTotalPages(pdfDoc.numPages)
         setIsLoading(false)
         loadingRef.current = false
+        
+        // Carregar outline (capítulos) do PDF
+        try {
+          const pdfOutline = await pdfDoc.getOutline()
+          setOutline(pdfOutline || [])
+        } catch (err) {
+          // Se não houver outline, deixa vazio
+          setOutline([])
+        }
         
         // Restaurar console.warn original
         console.warn = originalWarn
@@ -295,6 +306,82 @@ export default function PDFViewer({
     setScale((prev) => Math.max(prev - 0.25, 0.5))
   }
 
+  const handleOutlineItemClick = async (item: any) => {
+    if (!pdf) return
+    
+    try {
+      // Obter a página de destino do item do outline
+      const dest = item.dest
+      if (dest) {
+        let pageNumber = 1
+        
+        // O PDF.js retorna destinos de diferentes formas
+        if (Array.isArray(dest)) {
+          // Se for um array, o primeiro elemento geralmente é a referência da página
+          const destRef = dest[0]
+          
+          if (destRef && typeof destRef === 'object' && 'num' in destRef) {
+            // Se tiver propriedade 'num', usar diretamente
+            pageNumber = destRef.num + 1
+          } else if (typeof destRef === 'number') {
+            // Se for número direto
+            pageNumber = destRef + 1
+          } else {
+            // Tentar buscar pelo índice
+            try {
+              const pageIndex = await pdf.getPageIndex(destRef)
+              pageNumber = pageIndex + 1
+            } catch {
+              // Se falhar, tentar usar o índice do array
+              if (dest.length > 1 && typeof dest[1] === 'number') {
+                pageNumber = dest[1] + 1
+              }
+            }
+          }
+        } else if (typeof dest === 'string') {
+          // Se for uma string (CFI), tentar buscar a página
+          try {
+            const pageIndex = await pdf.getPageIndex(dest)
+            pageNumber = pageIndex + 1
+          } catch {
+            console.warn('Não foi possível navegar para o destino:', dest)
+          }
+        }
+        
+        // Garantir que o número da página está dentro dos limites
+        pageNumber = Math.max(1, Math.min(pageNumber, totalPages))
+        
+        if (pageNumber >= 1 && pageNumber <= totalPages) {
+          setCurrentPage(pageNumber)
+          setShowOutline(false) // Fechar o painel de capítulos após navegar
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao navegar para capítulo:', err)
+    }
+  }
+
+  const renderOutline = (items: any[], level: number = 0): JSX.Element[] => {
+    return items.map((item, index) => (
+      <div key={index}>
+        <button
+          onClick={() => handleOutlineItemClick(item)}
+          className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
+            level > 0 ? 'pl-' + (4 + level * 4) : ''
+          }`}
+          style={{ paddingLeft: `${1 + level * 1}rem` }}
+        >
+          <span className="text-sm text-gray-700">{item.title}</span>
+        </button>
+        {item.items && item.items.length > 0 && (
+          <div className="ml-4">
+            {renderOutline(item.items, level + 1)}
+          </div>
+        )}
+      </div>
+    ))
+  }
+
   // Atalhos de teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -333,7 +420,7 @@ export default function PDFViewer({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Controles */}
       <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -366,6 +453,17 @@ export default function PDFViewer({
             onChange={(e) => goToPage(parseInt(e.target.value) || 1)}
             className="ml-4 w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
+          {outline.length > 0 && (
+            <button
+              onClick={() => setShowOutline(!showOutline)}
+              className="ml-4 btn btn-outline-primary"
+              title="Mostrar capítulos"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={zoomOut} className="btn btn-outline-primary">
@@ -384,8 +482,28 @@ export default function PDFViewer({
         </div>
       </div>
 
+      {/* Painel de Capítulos (Outline) */}
+      {showOutline && outline.length > 0 && (
+        <div className="absolute left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 shadow-lg z-20 overflow-y-auto">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-800">Capítulos</h3>
+            <button
+              onClick={() => setShowOutline(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="py-2">
+            {renderOutline(outline)}
+          </div>
+        </div>
+      )}
+
       {/* Canvas */}
-      <div className="flex-1 overflow-auto bg-gray-100 p-4">
+      <div className={`flex-1 overflow-auto bg-gray-100 p-4 ${showOutline ? 'ml-64' : ''} transition-all duration-300`}>
         <div className="min-h-full flex items-center justify-center">
           <div className="relative">
             {isRendering && (
