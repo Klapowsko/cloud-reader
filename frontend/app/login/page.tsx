@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser, type LoginRequest } from '@/lib/api'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login: saveSession, isAuthenticated } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ 
@@ -15,6 +18,15 @@ export default function LoginPage() {
     general?: string
   }>({})
   const [isLoading, setIsLoading] = useState(false)
+
+  // Se já estiver autenticado, redireciona para home ou página de destino
+  // Lê searchParams.get('redirect') dentro do effect para evitar re-renders infinitos
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirect = searchParams.get('redirect') || '/'
+      router.push(redirect)
+    }
+  }, [isAuthenticated, router]) // searchParams não está nas dependências - valor é lido dentro do effect
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -49,13 +61,18 @@ export default function LoginPage() {
 
         const response = await loginUser(loginData)
         
-        // TODO: Salvar token no localStorage ou cookie quando JWT for implementado
-        // if (response.token) {
-        //   localStorage.setItem('token', response.token)
-        // }
+        // Salva a sessão em cookies usando o contexto
+        saveSession({
+          user: response.user,
+          token: response.token,
+        })
         
-        // Redireciona para a home após login bem-sucedido
-        router.push('/')
+        // Reseta o estado de loading antes do redirect
+        setIsLoading(false)
+        
+        // Redireciona para a página de destino ou home
+        const redirect = searchParams.get('redirect') || '/'
+        router.push(redirect)
       } catch (error) {
         setIsLoading(false)
         const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login'
