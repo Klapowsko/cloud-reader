@@ -212,3 +212,47 @@ func (h *BookHandler) DownloadBook(c *gin.Context) {
 	c.File(filePath)
 }
 
+// UpdateProgress atualiza o progresso de leitura de um livro
+func (h *BookHandler) UpdateProgress(c *gin.Context) {
+	userID, err := h.getUserID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "user ID não fornecido ou inválido",
+		})
+		return
+	}
+
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "ID inválido",
+		})
+		return
+	}
+
+	var req application.UpdateProgressRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "dados inválidos",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if err := h.bookService.UpdateReadingProgress(c.Request.Context(), uint(id), userID, req.CurrentPage, req.ProgressPercentage); err != nil {
+		statusCode := http.StatusInternalServerError
+		if err.Error() == "livro não encontrado" {
+			statusCode = http.StatusNotFound
+		}
+		c.JSON(statusCode, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "progresso atualizado com sucesso",
+	})
+}
+

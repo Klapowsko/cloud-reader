@@ -61,3 +61,22 @@ func (r *postgresBookRepository) Delete(ctx context.Context, id uint, userID uin
 	return nil
 }
 
+// UpdateProgress atualiza o progresso de leitura de um livro
+func (r *postgresBookRepository) UpdateProgress(ctx context.Context, id uint, userID uint, currentPage int, progressPercentage float64) error {
+	result := r.db.WithContext(ctx).
+		Model(&domain.Book{}).
+		Where("id = ? AND user_id = ?", id, userID).
+		Updates(map[string]interface{}{
+			"current_page":        currentPage,
+			"progress_percentage": progressPercentage,
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("livro não encontrado")
+	}
+	return nil
+}
+
