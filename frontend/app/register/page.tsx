@@ -86,40 +86,49 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 p-4">
-      {/* Decorative elements */}
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-amber-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-orange-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-violet-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-200/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Book-like card */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-amber-100/50 overflow-hidden">
+      <div className="w-full max-w-md relative z-10 animate-fade-in">
+        {/* Main card */}
+        <div className="card shadow-2xl border-0 overflow-hidden">
           {/* Decorative header */}
-          <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-orange-500 px-8 py-6 relative">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxwYXRoIGQ9Ik0wIDUwaDEwME01MCAwdjEwMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-20"></div>
-            <div className="relative z-10">
-              <h1 className="text-3xl font-serif font-bold text-white mb-2 tracking-wide">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-violet-600 px-6 sm:px-8 py-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 Cloud Reader
               </h1>
-              <p className="text-amber-100 text-sm">Crie sua conta e comece a ler</p>
+              <p className="text-blue-100 text-sm sm:text-base">Crie sua conta e comece a ler</p>
             </div>
           </div>
 
           {/* Form */}
-          <div className="px-8 py-8">
+          <div className="px-6 sm:px-8 py-8">
             {errors.general && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600 flex items-center gap-1">
-                  <span>⚠</span> {errors.general}
-                </p>
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm text-red-600 flex-1">{errors.general}</p>
+                </div>
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name field */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
                   Nome
                 </label>
                 <div className="relative">
@@ -131,16 +140,19 @@ export default function RegisterPage() {
                       setName(e.target.value)
                       if (errors.name) setErrors({ ...errors, name: undefined })
                     }}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    className={`input ${
                       errors.name
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-amber-200 bg-amber-50/50 focus:border-amber-400'
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                        : ''
                     }`}
                     placeholder="Seu nome completo"
                   />
                   {errors.name && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span>⚠</span> {errors.name}
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors.name}
                     </p>
                   )}
                 </div>
@@ -148,7 +160,7 @@ export default function RegisterPage() {
 
               {/* Email field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                   Email
                 </label>
                 <div className="relative">
@@ -160,16 +172,19 @@ export default function RegisterPage() {
                       setEmail(e.target.value)
                       if (errors.email) setErrors({ ...errors, email: undefined })
                     }}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    className={`input ${
                       errors.email
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-amber-200 bg-amber-50/50 focus:border-amber-400'
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                        : ''
                     }`}
                     placeholder="seu@email.com"
                   />
                   {errors.email && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span>⚠</span> {errors.email}
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors.email}
                     </p>
                   )}
                 </div>
@@ -177,7 +192,7 @@ export default function RegisterPage() {
 
               {/* Password field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Senha
                 </label>
                 <div className="relative">
@@ -193,16 +208,19 @@ export default function RegisterPage() {
                         setErrors({ ...errors, confirmPassword: undefined })
                       }
                     }}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    className={`input ${
                       errors.password
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-amber-200 bg-amber-50/50 focus:border-amber-400'
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                        : ''
                     }`}
                     placeholder="••••••••"
                   />
                   {errors.password && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span>⚠</span> {errors.password}
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors.password}
                     </p>
                   )}
                 </div>
@@ -212,7 +230,7 @@ export default function RegisterPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
                 >
                   Confirmar Senha
                 </label>
@@ -225,16 +243,19 @@ export default function RegisterPage() {
                       setConfirmPassword(e.target.value)
                       if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined })
                     }}
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                    className={`input ${
                       errors.confirmPassword
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-amber-200 bg-amber-50/50 focus:border-amber-400'
+                        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                        : ''
                     }`}
                     placeholder="••••••••"
                   />
                   {errors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                      <span>⚠</span> {errors.confirmPassword}
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors.confirmPassword}
                     </p>
                   )}
                 </div>
@@ -244,11 +265,11 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+                className="w-full btn btn-primary py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed mt-6"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Criando conta...
                   </span>
                 ) : (
@@ -259,9 +280,9 @@ export default function RegisterPage() {
 
             {/* Divider */}
             <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-amber-200"></div>
-              <span className="px-4 text-sm text-gray-500">ou</span>
-              <div className="flex-1 border-t border-amber-200"></div>
+              <div className="flex-1 border-t border-gray-200"></div>
+              <span className="px-4 text-sm text-gray-500 font-medium">ou</span>
+              <div className="flex-1 border-t border-gray-200"></div>
             </div>
 
             {/* Login link */}
@@ -270,27 +291,18 @@ export default function RegisterPage() {
                 Já tem uma conta?{' '}
                 <Link
                   href="/login"
-                  className="text-amber-600 hover:text-amber-700 font-semibold transition-colors duration-200 underline decoration-2 underline-offset-2"
+                  className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
                 >
                   Fazer login
                 </Link>
               </p>
             </div>
           </div>
-
-          {/* Decorative footer lines */}
-          <div className="px-8 py-4 bg-amber-50/30 border-t border-amber-100">
-            <div className="flex gap-2 justify-center">
-              <div className="w-12 h-0.5 bg-amber-300"></div>
-              <div className="w-8 h-0.5 bg-amber-200"></div>
-              <div className="w-4 h-0.5 bg-amber-100"></div>
-            </div>
-          </div>
         </div>
 
         {/* Decorative quote */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 italic font-serif">
+        <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <p className="text-sm text-gray-500 italic">
             "A leitura é uma viagem para lugares que só existem na imaginação"
           </p>
         </div>
