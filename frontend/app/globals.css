@@ -3,89 +3,241 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Paleta de cores moderna */
+  --color-primary: 59, 130, 246; /* blue-500 */
+  --color-primary-dark: 37, 99, 235; /* blue-600 */
+  --color-primary-light: 147, 197, 253; /* blue-300 */
+  --color-secondary: 139, 92, 246; /* violet-500 */
+  --color-accent: 236, 72, 153; /* pink-500 */
+  --color-success: 34, 197, 94; /* green-500 */
+  --color-warning: 251, 191, 36; /* amber-400 */
+  --color-error: 239, 68, 68; /* red-500 */
+  
+  /* Cores neutras */
+  --color-gray-50: 249, 250, 251;
+  --color-gray-100: 243, 244, 246;
+  --color-gray-200: 229, 231, 235;
+  --color-gray-300: 209, 213, 219;
+  --color-gray-400: 156, 163, 175;
+  --color-gray-500: 107, 114, 128;
+  --color-gray-600: 75, 85, 99;
+  --color-gray-700: 55, 65, 81;
+  --color-gray-800: 31, 41, 55;
+  --color-gray-900: 17, 24, 39;
+  
+  /* Backgrounds */
+  --bg-primary: 255, 255, 255;
+  --bg-secondary: 249, 250, 251;
+  --bg-gradient-start: 239, 246, 255; /* blue-50 */
+  --bg-gradient-end: 255, 251, 235; /* amber-50 */
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Transições */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-/* Tema de Leitura Digital - Estilos Customizados */
-
-/* Animação suave para elementos de formulário */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@layer base {
+  * {
+    @apply border-gray-200;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  body {
+    @apply bg-gradient-to-br from-blue-50 via-indigo-50 to-amber-50;
+    @apply text-gray-900;
+    @apply antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    @apply text-gray-900;
+    letter-spacing: -0.025em;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
   }
 }
 
-/* Animação para cards */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
+@layer components {
+  /* Botões modernos */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  
+  .btn-primary {
+    @apply bg-blue-600 text-white;
+    @apply hover:bg-blue-700;
+    @apply focus:ring-blue-500;
+    @apply shadow-md hover:shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800;
+    @apply hover:bg-gray-300;
+    @apply focus:ring-gray-500;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 text-white;
+    @apply hover:bg-red-700;
+    @apply focus:ring-red-500;
+  }
+  
+  /* Cards modernos */
+  .card {
+    @apply bg-white rounded-xl shadow-md;
+    @apply p-6;
+    @apply transition-all duration-300;
+    @apply border border-gray-100;
+  }
+  
+  .card-hover {
+    @apply hover:shadow-xl hover:-translate-y-1;
+  }
+  
+  /* Inputs modernos */
+  .input {
+    @apply w-full px-4 py-3 rounded-lg border-2;
+    @apply bg-white text-gray-900;
+    @apply border-gray-300 focus:border-blue-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/20;
+    @apply transition-all duration-200;
+  }
+  
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .badge-warning {
+    @apply bg-amber-100 text-amber-800;
+  }
+  
+  .badge-danger {
+    @apply bg-red-100 text-red-800;
   }
 }
 
-/* Aplicar animação suave aos formulários */
-form {
-  animation: fadeIn 0.5s ease-out;
+@layer utilities {
+  /* Animações customizadas */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  
+  /* Scrollbar customizada moderna */
+  .scrollbar-modern::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+    @apply hover:bg-gray-400;
+    transition: background-color 0.2s;
+  }
 }
 
-/* Estilo para inputs com foco - efeito de página de livro */
-input:focus {
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
-}
-
-/* Scrollbar customizada com tema de leitura */
+/* Scrollbar global */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #fef3c7;
+  @apply bg-gray-100;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f59e0b;
-  border-radius: 5px;
+  @apply bg-gray-300 rounded-full;
+  @apply hover:bg-gray-400;
+  transition: background-color 0.2s;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+/* Transições suaves globais */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-/* Efeito de texto com sombra suave (remetendo a texto impresso) */
-.font-serif {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+/* Melhorias de acessibilidade */
+:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
 }
 
-/* Transições suaves para todos os elementos interativos */
-button,
-a,
-input {
-  transition: all 0.2s ease-in-out;
-}
-
-/* Efeito de hover para links */
-a:hover {
-  text-decoration-thickness: 3px;
+/* Seleção de texto */
+::selection {
+  @apply bg-blue-200 text-blue-900;
 }
 
