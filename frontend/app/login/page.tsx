@@ -20,12 +20,13 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   // Se já estiver autenticado, redireciona para home ou página de destino
+  // Lê searchParams.get('redirect') dentro do effect para evitar re-renders infinitos
   useEffect(() => {
     if (isAuthenticated) {
       const redirect = searchParams.get('redirect') || '/'
       router.push(redirect)
     }
-  }, [isAuthenticated, router, searchParams])
+  }, [isAuthenticated, router]) // searchParams não está nas dependências - valor é lido dentro do effect
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -65,6 +66,9 @@ export default function LoginPage() {
           user: response.user,
           token: response.token,
         })
+        
+        // Reseta o estado de loading antes do redirect
+        setIsLoading(false)
         
         // Redireciona para a página de destino ou home
         const redirect = searchParams.get('redirect') || '/'
