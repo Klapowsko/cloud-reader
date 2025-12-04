@@ -17,5 +17,7 @@ type BookRepository interface {
 
 	// Delete remove um livro (valida ownership)
 	Delete(ctx context.Context, id uint, userID uint) error
-}
 
+	// UpdateProgress atualiza o progresso de leitura de um livro
+	UpdateProgress(ctx context.Context, id uint, userID uint, currentPage int, progressPercentage float64) error
+}

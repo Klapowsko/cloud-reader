@@ -92,8 +92,15 @@ export interface BookResponse {
   file_path: string
   file_size: number
   format: string
+  current_page?: number
+  progress_percentage?: number
   created_at: string
   updated_at: string
+}
+
+export interface UpdateProgressRequest {
+  current_page: number
+  progress_percentage: number
 }
 
 export interface ListBooksResponse {
@@ -228,5 +235,30 @@ export async function downloadBook(
     }
     throw new Error('Erro de conexão com o servidor')
   }
+}
+
+// Obter URL do arquivo do livro
+export function getBookFileUrl(id: number, userId: number): string {
+  return `${API_URL}/api/v1/books/${id}/download`
+}
+
+// Atualizar progresso de leitura
+export async function updateBookProgress(
+  id: number,
+  userId: number,
+  currentPage: number,
+  progressPercentage: number
+): Promise<void> {
+  return fetchApiWithUser<void>(
+    `/api/v1/books/${id}/progress`,
+    userId,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        current_page: currentPage,
+        progress_percentage: progressPercentage,
+      }),
+    }
+  )
 }
 

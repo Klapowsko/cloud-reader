@@ -13,6 +13,6 @@ func RegisterRoutes(router *gin.RouterGroup, handler *BookHandler) {
 		books.GET("/:id", handler.GetBook)
 		books.DELETE("/:id", handler.DeleteBook)
 		books.GET("/:id/download", handler.DownloadBook)
+		books.PUT("/:id/progress", handler.UpdateProgress)
 	}
 }
-

@@ -58,15 +58,17 @@ func (s *BookService) UploadBook(ctx context.Context, userID uint, fileHeader *m
 	}
 
 	return &BookResponse{
-		ID:        book.ID,
-		UserID:    book.UserID,
-		Title:     book.Title,
-		Filename:  book.Filename,
-		FilePath:  book.FilePath,
-		FileSize:  book.FileSize,
-		Format:    book.Format,
-		CreatedAt: book.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: book.UpdatedAt.Format(time.RFC3339),
+		ID:                book.ID,
+		UserID:            book.UserID,
+		Title:             book.Title,
+		Filename:          book.Filename,
+		FilePath:          book.FilePath,
+		FileSize:          book.FileSize,
+		Format:            book.Format,
+		CurrentPage:       book.CurrentPage,
+		ProgressPercentage: book.ProgressPercentage,
+		CreatedAt:         book.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:         book.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }
 
@@ -80,15 +82,17 @@ func (s *BookService) ListBooks(ctx context.Context, userID uint) (*ListBooksRes
 	bookResponses := make([]BookResponse, len(books))
 	for i, book := range books {
 		bookResponses[i] = BookResponse{
-			ID:        book.ID,
-			UserID:    book.UserID,
-			Title:     book.Title,
-			Filename:  book.Filename,
-			FilePath:  book.FilePath,
-			FileSize:  book.FileSize,
-			Format:    book.Format,
-			CreatedAt: book.CreatedAt.Format(time.RFC3339),
-			UpdatedAt: book.UpdatedAt.Format(time.RFC3339),
+			ID:                book.ID,
+			UserID:            book.UserID,
+			Title:             book.Title,
+			Filename:          book.Filename,
+			FilePath:          book.FilePath,
+			FileSize:          book.FileSize,
+			Format:            book.Format,
+			CurrentPage:       book.CurrentPage,
+			ProgressPercentage: book.ProgressPercentage,
+			CreatedAt:         book.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:         book.UpdatedAt.Format(time.RFC3339),
 		}
 	}
 
@@ -106,16 +110,34 @@ func (s *BookService) GetBook(ctx context.Context, id uint, userID uint) (*BookR
 	}
 
 	return &BookResponse{
-		ID:        book.ID,
-		UserID:    book.UserID,
-		Title:     book.Title,
-		Filename:  book.Filename,
-		FilePath:  book.FilePath,
-		FileSize:  book.FileSize,
-		Format:    book.Format,
-		CreatedAt: book.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: book.UpdatedAt.Format(time.RFC3339),
+		ID:                book.ID,
+		UserID:            book.UserID,
+		Title:             book.Title,
+		Filename:          book.Filename,
+		FilePath:          book.FilePath,
+		FileSize:          book.FileSize,
+		Format:            book.Format,
+		CurrentPage:       book.CurrentPage,
+		ProgressPercentage: book.ProgressPercentage,
+		CreatedAt:         book.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:         book.UpdatedAt.Format(time.RFC3339),
 	}, nil
+}
+
+// UpdateReadingProgress atualiza o progresso de leitura de um livro
+func (s *BookService) UpdateReadingProgress(ctx context.Context, id uint, userID uint, currentPage int, progressPercentage float64) error {
+	// Valida ownership primeiro
+	_, err := s.bookRepo.FindByID(ctx, id, userID)
+	if err != nil {
+		return errors.New("livro não encontrado")
+	}
+
+	// Atualiza o progresso
+	if err := s.bookRepo.UpdateProgress(ctx, id, userID, currentPage, progressPercentage); err != nil {
+		return fmt.Errorf("erro ao atualizar progresso: %w", err)
+	}
+
+	return nil
 }
 
 // DeleteBook remove um livro

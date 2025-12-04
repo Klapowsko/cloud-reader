@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { type BookResponse, deleteBook, downloadBook } from '@/lib/api'
+import { useRouter } from 'next/navigation'
+import { type BookResponse, deleteBook } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
 
 interface BookCardProps {
@@ -11,8 +12,8 @@ interface BookCardProps {
 
 export default function BookCard({ book, onDelete }: BookCardProps) {
   const { user } = useAuth()
+  const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
 
   const getFormatIcon = (format: string) => {
     switch (format.toLowerCase()) {
@@ -72,25 +73,8 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
     })
   }
 
-  const handleDownload = async () => {
-    if (!user) return
-
-    setIsDownloading(true)
-    try {
-      const blob = await downloadBook(book.id, user.id)
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = book.filename
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Erro ao fazer download')
-    } finally {
-      setIsDownloading(false)
-    }
+  const handleRead = () => {
+    router.push(`/books/${book.id}`)
   }
 
   const handleDelete = async () => {
@@ -146,33 +130,43 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
                 </svg>
                 <span>{formatDate(book.created_at)}</span>
               </div>
+              {(book.progress_percentage && book.progress_percentage > 0) && (
+                <>
+                  <span className="text-gray-300">•</span>
+                  <div className="flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                    <span>{Math.round(book.progress_percentage)}% lido</span>
+                  </div>
+                </>
+              )}
             </div>
+            {(book.progress_percentage && book.progress_percentage > 0) && (
+              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${book.progress_percentage}%` }}
+                ></div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex gap-2 pt-4 border-t border-gray-100">
           <button
-            onClick={handleDownload}
-            disabled={isDeleting || isDownloading}
+            onClick={handleRead}
+            disabled={isDeleting}
             className="flex-1 btn btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isDownloading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Baixando...</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Baixar</span>
-              </>
-            )}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span>Ler</span>
           </button>
           <button
             onClick={handleDelete}
-            disabled={isDeleting || isDownloading}
+            disabled={isDeleting}
             className="btn btn-danger flex items-center justify-center gap-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeleting ? (
