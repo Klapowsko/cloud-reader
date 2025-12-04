@@ -18,3 +18,74 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+/* Tema de Leitura Digital - Estilos Customizados */
+
+/* Animação suave para elementos de formulário */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animação para cards */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Aplicar animação suave aos formulários */
+form {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Estilo para inputs com foco - efeito de página de livro */
+input:focus {
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+}
+
+/* Scrollbar customizada com tema de leitura */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fef3c7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f59e0b;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d97706;
+}
+
+/* Efeito de texto com sombra suave (remetendo a texto impresso) */
+.font-serif {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Transições suaves para todos os elementos interativos */
+button,
+a,
+input {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Efeito de hover para links */
+a:hover {
+  text-decoration-thickness: 3px;
+}
+
