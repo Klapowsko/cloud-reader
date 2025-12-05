@@ -8,7 +8,7 @@ Aplicação Cloud Reader com backend em Go (Gin) e frontend em Next.js.
 cloud-reader/
 ├── backend/          # Backend em Go com Gin (Arquitetura Hexagonal)
 ├── frontend/         # Frontend em Next.js
-├── docker-compose.yml # Configuração Docker Compose
+├── docker compose.yml # Configuração Docker Compose
 └── README.md         # Este arquivo
 ```
 
@@ -24,8 +24,8 @@ cloud-reader/
 # Inicia todos os serviços (backend, frontend, postgres)
 make up
 
-# Ou usando docker-compose diretamente
-docker-compose up -d
+# Ou usando docker compose diretamente
+docker compose up -d
 ```
 
 Os serviços estarão disponíveis em:
@@ -39,17 +39,17 @@ Os serviços estarão disponíveis em:
 # Ver logs
 make logs
 # ou
-docker-compose logs -f
+docker compose logs -f
 
 # Parar serviços
 make down
 # ou
-docker-compose down
+docker compose down
 
 # Reconstruir imagens
 make build
 # ou
-docker-compose build
+docker compose build
 
 # Limpar tudo (containers, volumes, imagens)
 make clean

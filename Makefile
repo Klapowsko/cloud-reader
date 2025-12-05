@@ -9,7 +9,7 @@ help:
 	@echo ""
 	@echo "  make up        - Inicia todos os serviços (backend, frontend, postgres)"
 	@echo "  make down      - Para todos os serviços"
-	@echo "  make build     - Constrói as imagens Docker"
+	@echo "  make build     - Instala dependências e constrói as imagens Docker"
 	@echo "  make restart   - Reinicia todos os serviços"
 	@echo "  make logs      - Mostra os logs de todos os serviços"
 	@echo "  make clean     - Remove containers, volumes e imagens"
@@ -30,10 +30,19 @@ down:
 	@echo "🛑 Parando serviços..."
 	docker compose down
 
-## build: Constrói as imagens Docker
+## build: Instala dependências e constrói as imagens Docker
 build:
-	@echo "🔨 Construindo imagens..."
+	@echo "📦 Instalando dependências do backend..."
+	@cd backend && go mod download
+	@echo "✅ Dependências do backend instaladas!"
+	@echo ""
+	@echo "📦 Instalando dependências do frontend..."
+	@cd frontend && npm install
+	@echo "✅ Dependências do frontend instaladas!"
+	@echo ""
+	@echo "🔨 Construindo imagens Docker..."
 	docker compose build
+	@echo "✅ Build concluído!"
 
 ## restart: Reinicia todos os serviços
 restart:
