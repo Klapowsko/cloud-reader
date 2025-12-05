@@ -312,52 +312,86 @@ export default function PDFViewer({
     try {
       // Obter a página de destino do item do outline
       const dest = item.dest
-      if (dest) {
-        let pageNumber = 1
-        
-        // O PDF.js retorna destinos de diferentes formas
-        if (Array.isArray(dest)) {
-          // Se for um array, o primeiro elemento geralmente é a referência da página
+      if (!dest) {
+        console.warn('Item do outline não tem destino:', item)
+        return
+      }
+      
+      let pageNumber = 1
+      
+      // O PDF.js retorna destinos de diferentes formas
+      // A melhor forma é usar getPageIndex que resolve a referência corretamente
+      try {
+        // Se o destino for um array, o primeiro elemento é geralmente a referência da página
+        if (Array.isArray(dest) && dest.length > 0) {
           const destRef = dest[0]
           
-          if (destRef && typeof destRef === 'object' && 'num' in destRef) {
-            // Se tiver propriedade 'num', usar diretamente
-            pageNumber = destRef.num + 1
-          } else if (typeof destRef === 'number') {
-            // Se for número direto
-            pageNumber = destRef + 1
-          } else {
-            // Tentar buscar pelo índice
+          // Se for um objeto com referência, usar getPageIndex
+          if (destRef && typeof destRef === 'object') {
             try {
+              // getPageIndex retorna o índice baseado em 0, então adicionamos 1
               const pageIndex = await pdf.getPageIndex(destRef)
               pageNumber = pageIndex + 1
-            } catch {
-              // Se falhar, tentar usar o índice do array
-              if (dest.length > 1 && typeof dest[1] === 'number') {
-                pageNumber = dest[1] + 1
+              console.log('Navegando para página via getPageIndex:', pageNumber, 'do item:', item.title)
+            } catch (err) {
+              // Se getPageIndex falhar, tentar usar a propriedade 'num' se existir
+              if ('num' in destRef && typeof destRef.num === 'number') {
+                pageNumber = destRef.num + 1
+                console.log('Navegando para página via num:', pageNumber, 'do item:', item.title)
+              } else {
+                console.warn('Não foi possível obter página do destino:', destRef)
+                return
               }
             }
+          } else if (typeof destRef === 'number') {
+            // Se for número direto (índice baseado em 0)
+            pageNumber = destRef + 1
+            console.log('Navegando para página via número direto:', pageNumber, 'do item:', item.title)
           }
         } else if (typeof dest === 'string') {
-          // Se for uma string (CFI), tentar buscar a página
+          // Se for uma string (nome de destino), tentar resolver
           try {
-            const pageIndex = await pdf.getPageIndex(dest)
-            pageNumber = pageIndex + 1
-          } catch {
-            console.warn('Não foi possível navegar para o destino:', dest)
+            // Primeiro tentar getDestination se disponível
+            if (typeof pdf.getDestination === 'function') {
+              const resolvedDest = await pdf.getDestination(dest)
+              if (resolvedDest && Array.isArray(resolvedDest) && resolvedDest.length > 0) {
+                const destRef = resolvedDest[0]
+                if (destRef && typeof destRef === 'object') {
+                  const pageIndex = await pdf.getPageIndex(destRef)
+                  pageNumber = pageIndex + 1
+                }
+              }
+            } else {
+              // Fallback: tentar usar getPageIndex diretamente
+              const pageIndex = await pdf.getPageIndex(dest)
+              pageNumber = pageIndex + 1
+            }
+            console.log('Navegando para página via string destino:', pageNumber, 'do item:', item.title)
+          } catch (err) {
+            console.warn('Não foi possível resolver destino string:', dest, err)
+            return
           }
+        } else {
+          console.warn('Formato de destino desconhecido:', dest)
+          return
         }
-        
-        // Garantir que o número da página está dentro dos limites
-        pageNumber = Math.max(1, Math.min(pageNumber, totalPages))
-        
-        if (pageNumber >= 1 && pageNumber <= totalPages) {
-          setCurrentPage(pageNumber)
-          setShowOutline(false) // Fechar o painel de capítulos após navegar
-        }
+      } catch (err) {
+        console.error('Erro ao processar destino:', err, 'Item:', item.title)
+        return
+      }
+      
+      // Garantir que o número da página está dentro dos limites
+      pageNumber = Math.max(1, Math.min(pageNumber, totalPages))
+      
+      if (pageNumber >= 1 && pageNumber <= totalPages) {
+        console.log('Navegando para página final:', pageNumber, 'do item:', item.title)
+        setCurrentPage(pageNumber)
+        setShowOutline(false) // Fechar o painel de capítulos após navegar
+      } else {
+        console.warn('Número de página fora dos limites:', pageNumber, 'Total:', totalPages)
       }
     } catch (err) {
-      console.error('Erro ao navegar para capítulo:', err)
+      console.error('Erro ao navegar para capítulo:', err, 'Item:', item)
     }
   }
 
