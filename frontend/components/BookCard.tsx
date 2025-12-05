@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { type BookResponse, deleteBook } from '@/lib/api'
 import { useAuth } from '@/hooks/useAuth'
@@ -14,6 +14,15 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
   const { user } = useAuth()
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Garantir que progress_percentage seja um número válido
+  const progress = typeof book.progress_percentage === 'number' ? book.progress_percentage : 0
+  const progressWidth = Math.min(Math.max(progress, 0), 100)
+
+  // Debug: verificar progresso recebido
+  useEffect(() => {
+    console.log('BookCard - Livro:', book.title, 'Progresso:', book.progress_percentage, 'Tipo:', typeof book.progress_percentage, 'Progress calculado:', progress, 'Width:', progressWidth)
+  }, [book, progress, progressWidth])
 
   const getFormatIcon = (format: string) => {
     switch (format.toLowerCase()) {
@@ -130,26 +139,39 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
                 </svg>
                 <span>{formatDate(book.created_at)}</span>
               </div>
-              {(book.progress_percentage && book.progress_percentage > 0) && (
+              {progress > 0 && (
                 <>
                   <span className="text-gray-300">•</span>
                   <div className="flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
-                    <span>{Math.round(book.progress_percentage)}% lido</span>
+                    <span>{Math.round(progress)}% lido</span>
                   </div>
                 </>
               )}
             </div>
-            {(book.progress_percentage && book.progress_percentage > 0) && (
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                <div
-                  className="bg-primary-600 h-1.5 rounded-full transition-all duration-300"
-                  style={{ width: `${book.progress_percentage}%` }}
-                ></div>
-              </div>
-            )}
+            {/* Barra de progresso - sempre visível */}
+            <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden relative" style={{ position: 'relative' }}>
+              <div
+                className="h-1.5 rounded-full transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${progressWidth}%`, 
+                  backgroundColor: progress > 0 ? '#4f46e5' : '#d1d5db',
+                  minWidth: progress > 0 ? '2px' : '0',
+                  display: 'block',
+                  position: 'relative',
+                  zIndex: 1
+                }}
+                title={`${Math.round(progress)}% lido`}
+              ></div>
+              {/* Debug: mostrar valor do progresso */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="absolute top-0 right-0 text-xs text-gray-400" style={{ zIndex: 2 }}>
+                  {Math.round(progress)}%
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

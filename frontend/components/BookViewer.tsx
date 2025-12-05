@@ -65,9 +65,11 @@ export default function BookViewer({ book, onClose }: BookViewerProps) {
     const timeout = setTimeout(async () => {
       setIsSaving(true)
       try {
+        console.log('BookViewer - Salvando progresso:', { bookId: book.id, page, percentage })
         await updateBookProgress(book.id, user.id, page, percentage)
+        console.log('BookViewer - Progresso salvo com sucesso')
       } catch (error) {
-        console.error('Erro ao salvar progresso:', error)
+        console.error('BookViewer - Erro ao salvar progresso:', error)
       } finally {
         setIsSaving(false)
       }

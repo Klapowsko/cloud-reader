@@ -40,7 +40,12 @@ export default function BookReaderPage() {
   }, [user, bookId, router, authLoading])
 
   const handleClose = () => {
+    // Forçar recarregamento da página principal para atualizar o progresso
     router.push('/')
+    // Disparar evento customizado para recarregar a lista
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('books-updated'))
+    }
   }
 
   if (authLoading || isLoading) {

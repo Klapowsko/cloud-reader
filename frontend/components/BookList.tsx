@@ -18,6 +18,11 @@ export default function BookList() {
     setError(null)
     try {
       const response = await getBooks(user.id)
+      console.log('BookList - Livros carregados:', response.books.map(b => ({ 
+        id: b.id, 
+        title: b.title, 
+        progress: b.progress_percentage 
+      })))
       setBooks(response.books)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar livros')
@@ -30,6 +35,27 @@ export default function BookList() {
     loadBooks()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  // Recarregar livros quando a página recebe foco ou quando recebe evento de atualização
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('BookList - Página recebeu foco, recarregando livros...')
+      loadBooks()
+    }
+
+    const handleBooksUpdated = () => {
+      console.log('BookList - Evento books-updated recebido, recarregando livros...')
+      loadBooks()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('books-updated', handleBooksUpdated)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('books-updated', handleBooksUpdated)
+    }
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = (id: number) => {
     setBooks(books.filter((book) => book.id !== id))
