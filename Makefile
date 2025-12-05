@@ -18,7 +18,7 @@ help:
 ## up: Inicia todos os serviços
 up:
 	@echo "🚀 Iniciando serviços..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "✅ Serviços iniciados!"
 	@echo ""
 	@echo "Backend: http://localhost:8080"
@@ -28,25 +28,25 @@ up:
 ## down: Para todos os serviços
 down:
 	@echo "🛑 Parando serviços..."
-	docker-compose down
+	docker compose down
 
 ## build: Constrói as imagens Docker
 build:
 	@echo "🔨 Construindo imagens..."
-	docker-compose build
+	docker compose build
 
 ## restart: Reinicia todos os serviços
 restart:
 	@echo "🔄 Reiniciando serviços..."
-	docker-compose restart
+	docker compose restart
 
 ## logs: Mostra os logs de todos os serviços
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 ## clean: Remove containers, volumes e imagens
 clean:
 	@echo "🧹 Limpando containers, volumes e imagens..."
-	docker-compose down -v --rmi all
+	docker compose down -v --rmi all
 	@echo "✅ Limpeza concluída!"
 
