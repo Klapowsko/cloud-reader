@@ -104,16 +104,16 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
   }
 
   return (
-    <div className="card card-hover group overflow-hidden relative animate-scale-in">
+    <div className="card card-hover group overflow-hidden relative animate-scale-in h-full flex flex-col">
       {/* Gradient overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-violet-50/0 group-hover:from-blue-50/50 group-hover:to-violet-50/50 transition-all duration-300 pointer-events-none"></div>
       
-      <div className="relative">
+      <div className="relative flex-1 flex flex-col">
         <div className="flex items-start gap-4 mb-4">
           <div className="flex-shrink-0 p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
             {getFormatIcon(book.format)}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="text-lg font-bold text-gray-900 truncate flex-1" title={book.title}>
                 {book.title}
@@ -175,7 +175,7 @@ export default function BookCard({ book, onDelete }: BookCardProps) {
           </div>
         </div>
 
-        <div className="flex gap-2 pt-4 border-t border-gray-100">
+        <div className="flex gap-2 pt-4 border-t border-gray-100 mt-auto">
           <button
             onClick={handleRead}
             disabled={isDeleting}

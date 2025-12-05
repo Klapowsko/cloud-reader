@@ -128,7 +128,7 @@ export default function BookList() {
         {books.map((book, index) => (
           <div
             key={book.id}
-            className="animate-slide-in"
+            className="animate-slide-in flex"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <BookCard book={book} onDelete={handleDelete} />
