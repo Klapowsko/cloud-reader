@@ -99,15 +99,33 @@ export default function BookViewer({ book, onClose }: BookViewerProps) {
     // Para PDF, já temos a página, então não precisamos salvar aqui novamente
     // Mas para EPUB, podemos salvar baseado na porcentagem
     if (book.format.toLowerCase() === 'epub') {
-      saveProgress(Math.round((percentage / 100) * 100), percentage)
+      // Não salvar progresso se for 0% (pode ser um estado inicial)
+      if (percentage === 0) {
+        return
+      }
+      // Para EPUB, usar página 1 como padrão (não temos número de página real)
+      // Garantir que page seja pelo menos 1 quando há progresso
+      const page = Math.max(1, Math.ceil(percentage / 100))
+      saveProgress(page, percentage)
     }
   }
 
   const handleLocationChange = (location: string, progress: number) => {
     const percentage = progress * 100
     setProgressPercentage(percentage)
-    // Para EPUB, salvar baseado na porcentagem
-    saveProgress(Math.round(percentage), percentage)
+    
+    // Não salvar progresso se for 0% ou muito próximo de 0 (pode ser um estado inicial)
+    // Usar uma tolerância pequena para evitar problemas de ponto flutuante
+    if (percentage <= 0 || percentage < 0.01) {
+      console.log('BookViewer - Ignorando progresso 0% ou muito pequeno:', percentage)
+      return
+    }
+    
+    // Para EPUB, usar página 1 como padrão (não temos número de página real)
+    // Garantir que page seja pelo menos 1 quando há progresso
+    const page = Math.max(1, Math.ceil(percentage / 100))
+    console.log('BookViewer - Salvando progresso calculado:', { page, percentage })
+    saveProgress(page, percentage)
   }
 
   return (
