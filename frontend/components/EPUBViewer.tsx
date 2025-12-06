@@ -40,6 +40,8 @@ export default function EPUBViewer({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentProgress, setCurrentProgress] = useState<number>(initialProgress || 0)
+  const [showChapters, setShowChapters] = useState(false)
+  const [chapters, setChapters] = useState<any[]>([])
   
   const onLocationChangeRef = useRef(onLocationChange)
   const onProgressChangeRef = useRef(onProgressChange)
@@ -496,6 +498,152 @@ export default function EPUBViewer({
     }
   }
 
+  // Função auxiliar: carrega os capítulos do livro
+  const loadChapters = async (book: any) => {
+    try {
+      // @ts-ignore
+      const navigation = book.navigation
+      if (!navigation) {
+        setChapters([])
+        return
+      }
+
+      // Tentar diferentes formas de acessar o TOC
+      // @ts-ignore
+      let toc = navigation.toc || navigation.navMap || navigation.landmarks
+      
+      if (!toc) {
+        setChapters([])
+        return
+      }
+
+      // Função recursiva para processar o TOC
+      const processToc = (items: any[], level: number = 0): any[] => {
+        if (!items || !Array.isArray(items)) {
+          return []
+        }
+        
+        return items.map((item: any) => {
+          // epubjs pode usar diferentes propriedades para o título
+          const label = item.label || item.title || item.text || 'Sem título'
+          // epubjs pode usar href ou src para a referência
+          const href = item.href || item.src || item.id
+          // epubjs pode usar subitems, items, ou children para subcapítulos
+          const subitems = item.subitems || item.items || item.children || []
+          
+          const chapter: any = {
+            id: item.id || Math.random().toString(36).substr(2, 9),
+            label: label,
+            href: href,
+            level: level,
+            items: subitems && subitems.length > 0 
+              ? processToc(subitems, level + 1) 
+              : []
+          }
+          return chapter
+        })
+      }
+      
+      // Processar o TOC dependendo do formato
+      if (Array.isArray(toc)) {
+        const processedChapters = processToc(toc)
+        setChapters(processedChapters)
+      } else if (toc && typeof toc === 'object') {
+        // Se for um objeto, tentar converter para array
+        if (toc.length !== undefined) {
+          const tocArray = Array.from(toc)
+          const processedChapters = processToc(tocArray)
+          setChapters(processedChapters)
+        } else if (toc.items && Array.isArray(toc.items)) {
+          const processedChapters = processToc(toc.items)
+          setChapters(processedChapters)
+        } else {
+          // Tentar usar o próprio objeto como item único
+          const processedChapters = processToc([toc])
+          setChapters(processedChapters)
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar capítulos:', err)
+      setChapters([])
+    }
+  }
+
+  // Função auxiliar: navega para um capítulo
+  const navigateToChapter = async (chapter: any) => {
+    if (!renditionRef.current || !bookRef.current) return
+    
+    try {
+      let target: string | undefined = chapter.href
+      
+      // Se não tiver href, tentar usar o id ou label para buscar
+      if (!target && chapter.id) {
+        // @ts-ignore
+        const spine = bookRef.current.spine
+        if (spine) {
+          // @ts-ignore
+          const item = spine.get(chapter.id)
+          if (item) {
+            // @ts-ignore
+            target = item.href
+          }
+        }
+      }
+      
+      if (!target) {
+        console.warn('Capítulo não tem href válido:', chapter)
+        return
+      }
+      
+      // Usar display com o href ou CFI
+      // @ts-ignore
+      const displayed = renditionRef.current.display(target)
+      if (displayed && typeof displayed.then === 'function') {
+        await displayed
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      }
+      setShowChapters(false) // Fechar o painel após navegar
+    } catch (err: any) {
+      console.error('Erro ao navegar para capítulo:', err)
+      // Tentar fallback: usar apenas o href como string
+      try {
+        if (chapter.href) {
+          // @ts-ignore
+          const displayed = renditionRef.current.display(chapter.href)
+          if (displayed && typeof displayed.then === 'function') {
+            await displayed
+          }
+          setShowChapters(false)
+        }
+      } catch (fallbackErr) {
+        console.error('Erro no fallback de navegação:', fallbackErr)
+      }
+    }
+  }
+
+  // Função auxiliar: renderiza a lista de capítulos
+  const renderChapters = (items: any[], level: number = 0): JSX.Element[] => {
+    return items.map((item, index) => (
+      <div key={item.id || index}>
+        <button
+          onClick={() => navigateToChapter(item)}
+          className={`w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors ${
+            level > 0 ? 'pl-' + (4 + level * 4) : ''
+          }`}
+          style={{ paddingLeft: `${1 + level * 1}rem` }}
+        >
+          <span className="text-sm text-gray-700">{item.label}</span>
+        </button>
+        {item.items && item.items.length > 0 && (
+          <div className="ml-4">
+            {renderChapters(item.items, level + 1)}
+          </div>
+        )}
+      </div>
+    ))
+  }
+
   // Função auxiliar: configura o handler de relocação
   const setupRelocatedHandler = (rendition: any, book: any) => {
     rendition.on('relocated', (location: any) => {
@@ -654,6 +802,14 @@ export default function EPUBViewer({
         
         // 13. Configurar handler de relocação
         setupRelocatedHandler(rendition, book)
+
+        // 14. Carregar capítulos
+        try {
+          await loadChapters(book)
+        } catch (chaptersErr) {
+          console.warn('EPUBViewer - Erro ao carregar capítulos:', chaptersErr)
+          // Não é crítico, continuar sem capítulos
+        }
 
         setIsLoading(false)
       } catch (err: any) {
@@ -880,10 +1036,41 @@ export default function EPUBViewer({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
+          {chapters.length > 0 && (
+            <button
+              onClick={() => setShowChapters(!showChapters)}
+              className="ml-4 btn btn-outline-primary"
+              title="Mostrar capítulos"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden bg-gray-100 relative" style={{ minHeight: '600px' }}>
+      {/* Painel de Capítulos */}
+      {showChapters && chapters.length > 0 && (
+        <div className="absolute left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 shadow-lg z-20 overflow-y-auto">
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-800">Capítulos</h3>
+            <button
+              onClick={() => setShowChapters(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="py-2">
+            {renderChapters(chapters)}
+          </div>
+        </div>
+      )}
+
+      <div className={`flex-1 overflow-hidden bg-gray-100 relative transition-all duration-300 ${showChapters ? 'ml-64' : ''}`} style={{ minHeight: '600px' }}>
         <div 
           ref={viewerRef} 
           className="w-full h-full" 
