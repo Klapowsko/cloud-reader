@@ -40,6 +40,7 @@ export default function EPUBViewer({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentLocation, setCurrentLocation] = useState<string | null>(initialLocation || null)
+  const [currentProgress, setCurrentProgress] = useState<number>(initialProgress || 0)
   
   const onLocationChangeRef = useRef(onLocationChange)
   const onProgressChangeRef = useRef(onProgressChange)
@@ -570,6 +571,7 @@ export default function EPUBViewer({
           }
           
           if (loc) {
+            setCurrentProgress(progress * 100)
             if (onLocationChangeRef.current) {
               onLocationChangeRef.current(loc || '', progress)
             }
@@ -798,7 +800,7 @@ export default function EPUBViewer({
             </svg>
           </button>
           <span className="px-4 py-2 text-sm font-medium text-gray-700">
-            {error ? 'Erro' : isLoading ? 'Carregando...' : currentLocation ? 'Lendo...' : 'Pronto'}
+            {error ? 'Erro' : isLoading ? 'Carregando...' : currentProgress > 0 ? `${Math.round(currentProgress)}%` : 'Pronto'}
           </span>
           <button onClick={nextPage} className="btn btn-outline-primary" disabled={isLoading || !!error}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
