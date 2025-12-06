@@ -11,9 +11,13 @@ RUN npm install
 # Copia o código fonte
 COPY . .
 
+# Ajusta permissões para garantir acesso quando volumes são montados
+RUN chmod -R 755 /app
+
 # Expõe a porta
 EXPOSE 3000
 
-# Comando para desenvolvimento com hot reload
+# Executa como root para desenvolvimento (aceitável com volumes montados)
+# Isso resolve problemas de permissão com volumes do docker-compose
 CMD ["npm", "run", "dev"]
 

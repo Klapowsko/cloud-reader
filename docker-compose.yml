@@ -36,7 +36,7 @@ services:
     ports:
       - "${SERVER_PORT:-8080}:8080"
     volumes:
-      - ./backend:/app
+      - ./backend:/app:z
       - /app/tmp
     depends_on:
       postgres:
@@ -56,7 +56,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:z
       - /app/node_modules
       - /app/.next
     depends_on:

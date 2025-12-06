@@ -22,11 +22,11 @@ export default function LoginPage() {
   // Se já estiver autenticado, redireciona para home ou página de destino
   // Lê searchParams.get('redirect') dentro do effect para evitar re-renders infinitos
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoading) {
       const redirect = searchParams.get('redirect') || '/'
-      router.push(redirect)
+      router.replace(redirect)
     }
-  }, [isAuthenticated, router]) // searchParams não está nas dependências - valor é lido dentro do effect
+  }, [isAuthenticated, router, isLoading]) // searchParams não está nas dependências - valor é lido dentro do effect
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -71,8 +71,11 @@ export default function LoginPage() {
         setIsLoading(false)
         
         // Redireciona para a página de destino ou home
+        // Usa setTimeout para garantir que o cookie seja processado antes do redirect
         const redirect = searchParams.get('redirect') || '/'
-        router.push(redirect)
+        setTimeout(() => {
+          router.replace(redirect)
+        }, 100)
       } catch (error) {
         setIsLoading(false)
         const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login'

@@ -17,6 +17,9 @@ RUN go mod download
 # Copia o código fonte
 COPY . .
 
+# Ajusta permissões para garantir acesso quando volumes são montados
+RUN chmod -R 755 /app
+
 # Expõe a porta
 EXPOSE 8080
 
