@@ -176,6 +176,7 @@ export default function BookViewer({ book, onClose }: BookViewerProps) {
           <EPUBViewer
             fileUrl={fileUrl}
             userId={user?.id}
+            initialProgress={book.progress_percentage}
             onLocationChange={handleLocationChange}
             onProgressChange={handleProgressChange}
           />

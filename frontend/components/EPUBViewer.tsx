@@ -20,6 +20,7 @@ interface EPUBViewerProps {
   fileUrl: string
   userId?: number
   initialLocation?: string
+  initialProgress?: number // Progresso percentual inicial (0-100)
   onLocationChange?: (location: string, progress: number) => void
   onProgressChange?: (percentage: number) => void
 }
@@ -28,6 +29,7 @@ export default function EPUBViewer({
   fileUrl,
   userId,
   initialLocation,
+  initialProgress,
   onLocationChange,
   onProgressChange,
 }: EPUBViewerProps) {
@@ -465,26 +467,54 @@ export default function EPUBViewer({
         
         await new Promise((resolve) => setTimeout(resolve, 100))
         
+        // Gerar locations para cálculo de progresso e navegação
+        let targetLocation = initialLocation
         try {
           // @ts-ignore
           const locations = book.locations
           if (locations && typeof locations.generate === 'function') {
             // @ts-ignore
             await locations.generate(1000)
+          }
+          
+          // Se não temos initialLocation mas temos initialProgress, calcular a CFI
+          if (!targetLocation && initialProgress !== undefined && initialProgress > 0 && initialProgress < 100) {
             // @ts-ignore
-            const total = locations.total || 0
-            if (total > 0) {
-              // Não precisamos mais do totalLocations
+            if (locations && locations.total && locations.total > 0) {
+              const progress = initialProgress / 100
+              
+              // Tentar usar método do epubjs para converter porcentagem em CFI
+              // @ts-ignore
+              if (locations.cfiFromPercentage && typeof locations.cfiFromPercentage === 'function') {
+                // @ts-ignore
+                targetLocation = locations.cfiFromPercentage(progress)
+              } else if (locations.location && typeof locations.location === 'function') {
+                // Método alternativo do epubjs
+                // @ts-ignore
+                targetLocation = locations.location(progress)
+              } else {
+                // Fallback: calcular índice aproximado
+                // @ts-ignore
+                const targetIndex = Math.floor(progress * locations.total)
+                // @ts-ignore
+                if (locations.length && locations.length > targetIndex) {
+                  // @ts-ignore
+                  targetLocation = locations[targetIndex]
+                } else if (locations._locations && Array.isArray(locations._locations) && locations._locations.length > targetIndex) {
+                  // @ts-ignore
+                  targetLocation = locations._locations[targetIndex]
+                }
+              }
             }
           }
         } catch (locErr) {
-          // Não é crítico
+          // Não é crítico, continuar sem localização inicial
         }
 
         try {
           // @ts-ignore
-          const displayed = initialLocation 
-            ? rendition.display(initialLocation)
+          const displayed = targetLocation 
+            ? rendition.display(targetLocation)
             : rendition.display()
             
           if (displayed && typeof displayed.then === 'function') {
@@ -581,7 +611,7 @@ export default function EPUBViewer({
         }
       }
     }
-  }, [fileUrl, userId, initialLocation])
+  }, [fileUrl, userId, initialLocation, initialProgress])
 
   const calculateAndSaveProgress = useCallback((location: any) => {
     if (!location) {
