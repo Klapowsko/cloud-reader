@@ -15,6 +15,7 @@ import {
   calculateInitialLocation,
   displayInitialPage,
   setupRelocatedHandler,
+  generateFullLocations,
 } from '@/lib/viewers/epub/renditionUtils'
 
 interface UseEPUBViewerProps {
@@ -161,7 +162,13 @@ export function useEPUBViewer({
         
         await new Promise((resolve) => setTimeout(resolve, 100))
         
-        // 11. Calcular localização inicial
+        // 11. Gerar locations completas do livro (em background para não bloquear)
+        // Isso garante que o livro inteiro seja processado
+        generateFullLocations(book).catch((err) => {
+          console.warn('Erro ao gerar locations em background:', err)
+        })
+        
+        // 12. Calcular localização inicial
         const targetLocation = await calculateInitialLocation(book, initialLocation, initialProgress)
         
         // 12. Exibir página inicial

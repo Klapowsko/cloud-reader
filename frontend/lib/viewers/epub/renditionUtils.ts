@@ -218,6 +218,78 @@ export function setupRenditionEvents(rendition: any, book: any, onProgressChange
 }
 
 /**
+ * Gera locations completas do livro
+ */
+export async function generateFullLocations(book: any): Promise<void> {
+  try {
+    // @ts-ignore
+    const locations = book.locations
+    if (!locations || typeof locations.generate !== 'function') {
+      return
+    }
+
+    // Tentar obter o número total de itens no spine para calcular pontos necessários
+    // @ts-ignore
+    const spine = book.spine
+    let estimatedPoints = 2000 // Aumentado de 1000 para 2000 como base mínima
+    
+    if (spine) {
+      // @ts-ignore
+      const spineLength = spine.length || (spine.items && spine.items.length) || 0
+      // Estimar ~300 pontos por item do spine para melhor cobertura (aumentado de 200)
+      estimatedPoints = Math.max(2000, spineLength * 300)
+    }
+
+    // Gerar locations com mais pontos para garantir cobertura completa
+    // @ts-ignore
+    await locations.generate(estimatedPoints)
+    
+    // Aguardar um pouco para garantir que a geração foi concluída
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    
+    // Verificar se locations.total está disponível e se precisa de mais pontos
+    // @ts-ignore
+    const currentTotal = locations.total || 0
+    // @ts-ignore
+    if (currentTotal > 0 && currentTotal < estimatedPoints * 0.7) {
+      // Se o total gerado for muito menor que o esperado, tentar gerar mais
+      const additionalPoints = estimatedPoints * 1.5
+      // @ts-ignore
+      await locations.generate(additionalPoints)
+      await new Promise((resolve) => setTimeout(resolve, 800))
+    }
+    
+    // Verificar novamente e fazer uma última tentativa se necessário
+    // @ts-ignore
+    const finalTotal = locations.total || 0
+    // @ts-ignore
+    if (spine && finalTotal > 0) {
+      // @ts-ignore
+      const spineLength = spine.length || (spine.items && spine.items.length) || 0
+      // Se ainda parece que falta conteúdo, gerar mais uma vez
+      if (finalTotal < spineLength * 250) {
+        // @ts-ignore
+        await locations.generate(spineLength * 400)
+        await new Promise((resolve) => setTimeout(resolve, 800))
+      }
+    }
+  } catch (err) {
+    console.warn('Erro ao gerar locations completas:', err)
+    // Tentar geração básica como fallback
+    try {
+      // @ts-ignore
+      const locations = book.locations
+      if (locations && typeof locations.generate === 'function') {
+        // @ts-ignore
+        await locations.generate(2000) // Aumentado de 1000 para 2000
+      }
+    } catch (fallbackErr) {
+      // Ignorar erro de fallback
+    }
+  }
+}
+
+/**
  * Calcula a localização inicial baseada no progresso
  */
 export async function calculateInitialLocation(
@@ -228,12 +300,11 @@ export async function calculateInitialLocation(
   let targetLocation = initialLocation
   
   try {
+    // Gerar locations completas primeiro
+    await generateFullLocations(book)
+    
     // @ts-ignore
     const locations = book.locations
-    if (locations && typeof locations.generate === 'function') {
-      // @ts-ignore
-      await locations.generate(1000)
-    }
     
     // Se não temos initialLocation mas temos initialProgress, calcular a CFI
     if (!targetLocation && initialProgress !== undefined && initialProgress > 0 && initialProgress < 100) {
@@ -312,7 +383,7 @@ export function setupRelocatedHandler(
   onProgressChange?: (percentage: number) => void,
   setCurrentProgress?: (progress: number) => void
 ) {
-  rendition.on('relocated', (location: any) => {
+  rendition.on('relocated', async (location: any) => {
     const loc = location.start?.cfi || location.location?.start?.cfi || location.start
     
     let progress = 0
@@ -336,6 +407,25 @@ export function setupRelocatedHandler(
               progress = index / locations.total
             }
           }
+          
+          // Se o progresso estiver acima de 90% e locations.total parecer incompleto,
+          // tentar gerar mais locations em background
+          if (progress > 0.9 && typeof locations.generate === 'function') {
+            // @ts-ignore
+            const spine = book.spine
+            if (spine) {
+              // @ts-ignore
+              const spineLength = spine.length || (spine.items && spine.items.length) || 0
+              // @ts-ignore
+              if (!locations.total || locations.total < spineLength * 200) {
+                // Gerar mais locations em background sem bloquear
+                // @ts-ignore
+                locations.generate(spineLength * 400).catch(() => {
+                  // Ignorar erros silenciosamente
+                })
+              }
+            }
+          }
         }
       } catch (calcErr) {
         // Ignorar erros de cálculo
@@ -343,7 +433,10 @@ export function setupRelocatedHandler(
     }
     
     if (loc) {
+      // Garantir que o progresso não ultrapasse 100%
+      progress = Math.min(1, Math.max(0, progress))
       const progressPercentage = progress * 100
+      
       if (setCurrentProgress) {
         setCurrentProgress(progressPercentage)
       }
