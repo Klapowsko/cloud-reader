@@ -1,6 +1,14 @@
 // Utilitário para chamadas à API do backend
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+// Usa variável de ambiente, com fallback apenas para desenvolvimento local
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+    ? 'http://localhost:8080' 
+    : undefined)
+
+if (!API_URL) {
+  console.error('NEXT_PUBLIC_API_URL não está configurada. Configure no arquivo .env ou docker-compose.yml')
+}
 
 export interface RegisterRequest {
   name: string

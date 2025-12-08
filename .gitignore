@@ -14,7 +14,10 @@ Thumbs.db
 logs/
 
 # Variáveis de ambiente
+# Os arquivos .env estão em backend/ e frontend/
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
 

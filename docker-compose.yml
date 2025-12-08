@@ -3,6 +3,8 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: cloud-reader-db
+    env_file:
+      - ./backend/.env
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -19,15 +21,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend Go com live reload
+  # Backend Go
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${ENVIRONMENT:-development}
     container_name: cloud-reader-backend
+    env_file:
+      - ./backend/.env
     environment:
       DB_HOST: postgres
-      DB_PORT: 5432
+      DB_PORT: ${DB_PORT:-5432}
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-cloud_reader}
@@ -36,8 +42,11 @@ services:
     ports:
       - "${SERVER_PORT:-8080}:8080"
     volumes:
+      # Em desenvolvimento: monta código para live reload
+      # Em produção: código já está no container, volume é ignorado
       - ./backend:/app:z
       - /app/tmp
+      - backend_uploads:/root/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,12 +59,20 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${ENVIRONMENT:-development}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     container_name: cloud-reader-frontend
+    env_file:
+      - ./frontend/.env
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:${SERVER_PORT:-8080}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+      NODE_ENV: ${ENVIRONMENT:-development}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
+      # Em desenvolvimento: monta código para hot reload
+      # Em produção: código já está no container, volumes são ignorados
       - ./frontend:/app:z
       - /app/node_modules
       - /app/.next
@@ -68,8 +85,9 @@ services:
 volumes:
   postgres_data:
     driver: local
+  backend_uploads:
+    driver: local
 
 networks:
   cloud-reader-network:
     driver: bridge
-

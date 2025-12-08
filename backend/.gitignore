@@ -31,6 +31,10 @@ vendor/
 # Variáveis de ambiente
 .env
 .env.local
+.env.production
+# Mas manter os arquivos de exemplo
+!.env.example
+!.env.production.example
 
 # Uploads de arquivos
 uploads/

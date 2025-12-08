@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  env: {
-    API_URL: process.env.API_URL || 'http://localhost:8080',
-  },
+  // Habilitar output standalone para produção
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   webpack: (config, { isServer }) => {
     // Configuração para epubjs e pdfjs-dist
     if (!isServer) {
