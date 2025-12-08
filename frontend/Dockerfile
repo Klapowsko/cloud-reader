@@ -64,8 +64,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Criar diretório public (Next.js standalone já inclui o necessário, public é opcional)
 RUN mkdir -p ./public && chown nextjs:nodejs ./public
 
-# Verificar estrutura antes de mudar para usuário não-root (para debug se necessário)
-RUN ls -la /app/ | head -20 || true
+# Verificar estrutura e encontrar server.js
+RUN echo "=== Estrutura do diretório /app ===" && \
+    ls -la /app/ && \
+    echo "=== Procurando server.js ===" && \
+    find /app -name "server.js" -type f 2>/dev/null || echo "server.js não encontrado" && \
+    echo "=== Conteúdo de .next/standalone (se existir) ===" && \
+    ls -la /app/.next/standalone/ 2>/dev/null || echo ".next/standalone não existe"
 
 USER nextjs
 
@@ -78,8 +83,8 @@ ENV HOSTNAME="0.0.0.0"
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# O Next.js standalone coloca server.js na raiz do diretório standalone
-CMD ["node", "server.js"]
+# Tentar encontrar e executar server.js, ou usar npm start como fallback
+CMD ["sh", "-c", "if [ -f server.js ]; then node server.js; elif [ -f .next/standalone/server.js ]; then node .next/standalone/server.js; else echo 'Erro: server.js não encontrado. Estrutura:' && ls -la && exit 1; fi"]
 
 # Seleciona o estágio baseado no BUILD_ENV
 FROM ${BUILD_ENV} AS final
