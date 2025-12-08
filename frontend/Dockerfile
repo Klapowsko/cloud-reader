@@ -58,10 +58,14 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copiar arquivos do build
+# O Next.js standalone coloca tudo em .next/standalone
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Criar diretório public (Next.js standalone já inclui o necessário, public é opcional)
 RUN mkdir -p ./public && chown nextjs:nodejs ./public
+
+# Verificar estrutura antes de mudar para usuário não-root (para debug se necessário)
+RUN ls -la /app/ | head -20 || true
 
 USER nextjs
 
@@ -74,6 +78,7 @@ ENV HOSTNAME="0.0.0.0"
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+# O Next.js standalone coloca server.js na raiz do diretório standalone
 CMD ["node", "server.js"]
 
 # Seleciona o estágio baseado no BUILD_ENV
