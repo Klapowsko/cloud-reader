@@ -80,6 +80,9 @@ prod-build:
 		cp frontend/.env.production.example frontend/.env.production; \
 		echo "⚠️  IMPORTANTE: Edite frontend/.env.production com suas configurações de produção!"; \
 	fi
+	@echo "📝 Criando links simbólicos .env -> .env.production para docker-compose..."
+	@cd backend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
+	@cd frontend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
 	ENVIRONMENT=production docker compose build
 	@echo "✅ Build de produção concluído!"
 
@@ -96,6 +99,9 @@ prod-up:
 		cp frontend/.env.production.example frontend/.env.production; \
 		echo "⚠️  IMPORTANTE: Edite frontend/.env.production com suas configurações de produção!"; \
 	fi
+	@echo "📝 Criando links simbólicos .env -> .env.production para docker-compose..."
+	@cd backend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
+	@cd frontend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
 	ENVIRONMENT=production docker compose up -d
 	@echo "✅ Serviços de produção iniciados!"
 
