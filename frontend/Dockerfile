@@ -57,20 +57,25 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copiar arquivos do build
-# O Next.js standalone coloca tudo em .next/standalone
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Criar diretório public (Next.js standalone já inclui o necessário, public é opcional)
+# Copiar package.json e arquivos necessários
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
+COPY --from=builder --chown=nextjs:nodejs /app/package-lock.json* ./
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
+
+# Instalar apenas dependências de produção
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copiar arquivos do build para /tmp como backup (volume pode sobrescrever)
+COPY --from=builder --chown=nextjs:nodejs /app/.next /tmp/.next
+# Também copiar para /app (será sobrescrito pelo volume, mas serve como fallback)
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+
+# Criar diretório public se não existir
 RUN mkdir -p ./public && chown nextjs:nodejs ./public
 
-# Verificar estrutura e encontrar server.js
-RUN echo "=== Estrutura do diretório /app ===" && \
-    ls -la /app/ && \
-    echo "=== Procurando server.js ===" && \
-    find /app -name "server.js" -type f 2>/dev/null || echo "server.js não encontrado" && \
-    echo "=== Conteúdo de .next/standalone (se existir) ===" && \
-    ls -la /app/.next/standalone/ 2>/dev/null || echo ".next/standalone não existe"
+# Ajustar permissões
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -83,8 +88,9 @@ ENV HOSTNAME="0.0.0.0"
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Tentar encontrar e executar server.js, ou usar npm start como fallback
-CMD ["sh", "-c", "if [ -f server.js ]; then node server.js; elif [ -f .next/standalone/server.js ]; then node .next/standalone/server.js; else echo 'Erro: server.js não encontrado. Estrutura:' && ls -la && exit 1; fi"]
+# Script de inicialização: se .next não existir no volume (montado), copia do container
+# O volume pode sobrescrever, então garantimos que o build esteja disponível
+CMD ["sh", "-c", "if [ ! -d .next ] || [ ! -f .next/BUILD_ID ]; then echo 'Copiando .next do container para o volume...' && cp -r /tmp/.next ./.next 2>/dev/null || echo 'Aviso: .next não encontrado'; fi && npm start"]
 
 # Seleciona o estágio baseado no BUILD_ENV
 FROM ${BUILD_ENV} AS final

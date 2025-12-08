@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Habilitar output standalone para produção
-  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  // Removido output standalone - usando build padrão com npm start
+  // output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   webpack: (config, { isServer }) => {
     // Configuração para epubjs e pdfjs-dist
     if (!isServer) {
