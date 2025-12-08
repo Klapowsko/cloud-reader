@@ -64,7 +64,7 @@ export async function waitForViewerElement(
   }
   
   // Se não estiver disponível, tentar pelo ID
-  let elementById = document.getElementById(containerId)
+  let elementById = document.getElementById(containerId) as HTMLDivElement | null
   if (elementById) {
     // @ts-ignore
     viewerRef.current = elementById
@@ -82,7 +82,7 @@ export async function waitForViewerElement(
     }
     
     // Tentar pelo ID
-    elementById = document.getElementById(containerId)
+    elementById = document.getElementById(containerId) as HTMLDivElement | null
     if (elementById) {
       // @ts-ignore
       viewerRef.current = elementById
@@ -94,7 +94,7 @@ export async function waitForViewerElement(
   }
   
   // Última tentativa
-  elementById = document.getElementById(containerId)
+  elementById = document.getElementById(containerId) as HTMLDivElement | null
   if (elementById) {
     // @ts-ignore
     viewerRef.current = elementById
