@@ -93,8 +93,8 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Script de inicialização: restaura node_modules e .next se volume os sobrescreveu
-# Usa o caminho completo do next para garantir que funcione
-CMD ["sh", "-c", "if [ ! -d node_modules ] || [ ! -f node_modules/.bin/next ]; then echo 'Restaurando node_modules do container...' && rm -rf node_modules && cp -r /tmp/node_modules ./node_modules 2>/dev/null || echo 'Aviso: node_modules não encontrado'; fi && if [ ! -d .next ] || [ ! -f .next/BUILD_ID ]; then echo 'Restaurando .next do container...' && rm -rf .next && cp -r /tmp/.next ./.next 2>/dev/null || echo 'Aviso: .next não encontrado'; fi && if [ -f node_modules/.bin/next ]; then node_modules/.bin/next start; else npm start; fi"]
+# Usa o caminho completo do next do backup se o volume sobrescreveu
+CMD ["sh", "-c", "if [ ! -d node_modules ] || [ ! -f node_modules/.bin/next ]; then echo 'Restaurando node_modules do container...' && cp -r /tmp/node_modules/* ./node_modules/ 2>/dev/null || cp -r /tmp/node_modules ./node_modules 2>/dev/null || echo 'Aviso: node_modules não encontrado'; fi && if [ ! -d .next ] || [ ! -f .next/BUILD_ID ]; then echo 'Restaurando .next do container...' && cp -r /tmp/.next/* ./.next/ 2>/dev/null || cp -r /tmp/.next ./.next 2>/dev/null || echo 'Aviso: .next não encontrado'; fi && if [ -f /tmp/node_modules/.bin/next ]; then /tmp/node_modules/.bin/next start; elif [ -f node_modules/.bin/next ]; then node_modules/.bin/next start; else echo 'Erro: next não encontrado' && exit 1; fi"]
 
 # Seleciona o estágio baseado no BUILD_ENV
 FROM ${BUILD_ENV} AS final
