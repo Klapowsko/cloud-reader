@@ -303,7 +303,7 @@ export default function RegisterPage() {
         {/* Decorative quote */}
         <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
           <p className="text-sm text-gray-500 italic">
-            "A leitura é uma viagem para lugares que só existem na imaginação"
+            &ldquo;A leitura é uma viagem para lugares que só existem na imaginação&rdquo;
           </p>
         </div>
       </div>

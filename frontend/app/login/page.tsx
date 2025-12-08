@@ -26,7 +26,7 @@ export default function LoginPage() {
       const redirect = searchParams.get('redirect') || '/'
       router.replace(redirect)
     }
-  }, [isAuthenticated, router, isLoading]) // searchParams não está nas dependências - valor é lido dentro do effect
+  }, [isAuthenticated, router, isLoading, searchParams])
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -237,7 +237,7 @@ export default function LoginPage() {
         {/* Decorative quote */}
         <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
           <p className="text-sm text-gray-500 italic">
-            "Um livro é um sonho que você segura nas mãos"
+            &ldquo;Um livro é um sonho que você segura nas mãos&rdquo;
           </p>
         </div>
       </div>
