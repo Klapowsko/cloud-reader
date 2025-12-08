@@ -138,8 +138,8 @@ export default function PDFCanvas({
   }, [pdf, currentPage, scale, onRenderingChange])
 
   return (
-    <div className="min-h-full flex items-center justify-center p-2 md:p-4">
-      <div className="relative w-full max-w-full">
+    <div className="min-h-full flex items-center justify-center">
+      <div className="relative">
         {isRendering && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded">
             <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
@@ -147,8 +147,7 @@ export default function PDFCanvas({
         )}
         <canvas 
           ref={canvasRef} 
-          className="shadow-lg bg-white max-w-full h-auto"
-          style={{ maxWidth: '100%', height: 'auto' }}
+          className="shadow-lg bg-white"
         />
       </div>
     </div>

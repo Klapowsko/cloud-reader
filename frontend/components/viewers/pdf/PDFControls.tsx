@@ -33,7 +33,7 @@ export default function PDFControls({
 }: PDFControlsProps) {
   return (
     <div className="flex flex-col md:flex-row items-center justify-between p-2 md:p-4 bg-white border-b border-gray-200 gap-2 md:gap-0">
-      <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+      <div className="flex items-center gap-1 md:gap-2 flex-wrap justify-center md:justify-start">
         <button
           onClick={onPrev}
           disabled={currentPage === 1 || isLoading || !!error}
@@ -44,7 +44,8 @@ export default function PDFControls({
           </svg>
         </button>
         <span className="px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
-          {currentPage}/{totalPages}
+          <span className="md:hidden">{currentPage}/{totalPages}</span>
+          <span className="hidden md:inline">Página {currentPage} de {totalPages}</span>
         </span>
         <button
           onClick={onNext}
@@ -77,7 +78,7 @@ export default function PDFControls({
           </button>
         )}
       </div>
-      <div className="flex items-center gap-1 md:gap-2">
+      <div className="flex items-center gap-1 md:gap-2 justify-center md:justify-end">
         <button
           onClick={onZoomOut}
           className="btn btn-outline-primary p-2 md:p-1"

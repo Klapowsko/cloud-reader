@@ -17,7 +17,7 @@ export default function ViewerControls({
 }: ViewerControlsProps) {
   return (
     <div className="flex items-center justify-between p-2 md:p-4 bg-white border-b border-gray-200">
-      <div className="flex items-center gap-1 md:gap-2 flex-wrap">
+      <div className="flex items-center gap-1 md:gap-2 flex-wrap justify-center md:justify-start">
         <button
           onClick={onPrev}
           className="btn btn-outline-primary p-2 md:p-1"
