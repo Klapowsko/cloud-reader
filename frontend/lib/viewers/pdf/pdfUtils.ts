@@ -60,8 +60,8 @@ export function setupPDFJSWarnings() {
  */
 export async function loadPDFFile(
   fileUrl: string,
-  userId?: number,
-  blobUrlRef: React.MutableRefObject<string | null>
+  blobUrlRef: React.MutableRefObject<string | null>,
+  userId?: number
 ): Promise<string> {
   let url = fileUrl
   

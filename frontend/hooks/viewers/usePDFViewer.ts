@@ -58,7 +58,7 @@ export function usePDFViewer({
         }
 
         // 2. Carregar arquivo PDF
-        const url = await loadPDFFile(fileUrl, userId, blobUrlRef)
+        const url = await loadPDFFile(fileUrl, blobUrlRef, userId)
         
         if (cancelled) {
           if (blobUrlRef.current) {
