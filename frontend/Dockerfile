@@ -66,6 +66,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
 RUN npm ci --only=production && \
     npm cache clean --force
 
+# Copiar node_modules para /tmp como backup (volume pode sobrescrever)
+RUN cp -r /app/node_modules /tmp/node_modules && \
+    chown -R nextjs:nodejs /tmp/node_modules
+
 # Copiar arquivos do build para /tmp como backup (volume pode sobrescrever)
 COPY --from=builder --chown=nextjs:nodejs /app/.next /tmp/.next
 # Também copiar para /app (será sobrescrito pelo volume, mas serve como fallback)
@@ -88,9 +92,8 @@ ENV HOSTNAME="0.0.0.0"
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Script de inicialização: se .next não existir no volume (montado), copia do container
-# O volume pode sobrescrever, então garantimos que o build esteja disponível
-CMD ["sh", "-c", "if [ ! -d .next ] || [ ! -f .next/BUILD_ID ]; then echo 'Copiando .next do container para o volume...' && cp -r /tmp/.next ./.next 2>/dev/null || echo 'Aviso: .next não encontrado'; fi && npm start"]
+# Script de inicialização: restaura node_modules e .next se volume os sobrescreveu
+CMD ["sh", "-c", "if [ ! -d node_modules ] || [ ! -f node_modules/.bin/next ]; then echo 'Restaurando node_modules do container...' && cp -r /tmp/node_modules ./node_modules 2>/dev/null || echo 'Aviso: node_modules não encontrado'; fi && if [ ! -d .next ] || [ ! -f .next/BUILD_ID ]; then echo 'Restaurando .next do container...' && cp -r /tmp/.next ./.next 2>/dev/null || echo 'Aviso: .next não encontrado'; fi && npm start"]
 
 # Seleciona o estágio baseado no BUILD_ENV
 FROM ${BUILD_ENV} AS final
