@@ -32,13 +32,6 @@ down:
 
 ## build: Instala dependências e constrói as imagens Docker
 build:
-	@echo "📦 Instalando dependências do backend..."
-	@cd backend && go mod download
-	@echo "✅ Dependências do backend instaladas!"
-	@echo ""
-	@echo "📦 Instalando dependências do frontend..."
-	@cd frontend && npm install
-	@echo "✅ Dependências do frontend instaladas!"
 	@echo ""
 	@echo "🔨 Construindo imagens Docker..."
 	docker compose build
