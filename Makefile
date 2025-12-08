@@ -25,12 +25,13 @@ help:
 ## up: Inicia todos os serviços em modo desenvolvimento
 up:
 	@echo "🚀 Iniciando serviços (desenvolvimento)..."
-	@if [ ! -f backend/.env ] || [ ! -f frontend/.env ]; then \
-		echo "⚠️  Arquivos .env não encontrados!"; \
-		echo "📝 Execute:"; \
-		echo "   cp backend/.env.example backend/.env"; \
-		echo "   cp frontend/.env.example frontend/.env"; \
-		exit 1; \
+	@if [ ! -f backend/.env ]; then \
+		echo "📝 Criando backend/.env a partir de backend/.env.example..."; \
+		cp backend/.env.example backend/.env; \
+	fi
+	@if [ ! -f frontend/.env ]; then \
+		echo "📝 Criando frontend/.env a partir de frontend/.env.example..."; \
+		cp frontend/.env.example frontend/.env; \
 	fi
 	ENVIRONMENT=development docker compose up -d
 	@echo "✅ Serviços iniciados!"
@@ -69,12 +70,15 @@ clean:
 ## prod-build: Constrói as imagens Docker para produção
 prod-build:
 	@echo "🔨 Construindo imagens de produção..."
-	@if [ ! -f backend/.env.production ] || [ ! -f frontend/.env.production ]; then \
-		echo "⚠️  Arquivos .env.production não encontrados!"; \
-		echo "📝 Execute:"; \
-		echo "   cp backend/.env.production.example backend/.env.production"; \
-		echo "   cp frontend/.env.production.example frontend/.env.production"; \
-		exit 1; \
+	@if [ ! -f backend/.env.production ]; then \
+		echo "📝 Criando backend/.env.production a partir de backend/.env.production.example..."; \
+		cp backend/.env.production.example backend/.env.production; \
+		echo "⚠️  IMPORTANTE: Edite backend/.env.production com suas configurações de produção!"; \
+	fi
+	@if [ ! -f frontend/.env.production ]; then \
+		echo "📝 Criando frontend/.env.production a partir de frontend/.env.production.example..."; \
+		cp frontend/.env.production.example frontend/.env.production; \
+		echo "⚠️  IMPORTANTE: Edite frontend/.env.production com suas configurações de produção!"; \
 	fi
 	ENVIRONMENT=production docker compose build
 	@echo "✅ Build de produção concluído!"
@@ -82,12 +86,15 @@ prod-build:
 ## prod-up: Inicia os serviços em modo produção
 prod-up:
 	@echo "🚀 Iniciando serviços (produção)..."
-	@if [ ! -f backend/.env.production ] || [ ! -f frontend/.env.production ]; then \
-		echo "⚠️  Arquivos .env.production não encontrados!"; \
-		echo "📝 Execute:"; \
-		echo "   cp backend/.env.production.example backend/.env.production"; \
-		echo "   cp frontend/.env.production.example frontend/.env.production"; \
-		exit 1; \
+	@if [ ! -f backend/.env.production ]; then \
+		echo "📝 Criando backend/.env.production a partir de backend/.env.production.example..."; \
+		cp backend/.env.production.example backend/.env.production; \
+		echo "⚠️  IMPORTANTE: Edite backend/.env.production com suas configurações de produção!"; \
+	fi
+	@if [ ! -f frontend/.env.production ]; then \
+		echo "📝 Criando frontend/.env.production a partir de frontend/.env.production.example..."; \
+		cp frontend/.env.production.example frontend/.env.production; \
+		echo "⚠️  IMPORTANTE: Edite frontend/.env.production com suas configurações de produção!"; \
 	fi
 	ENVIRONMENT=production docker compose up -d
 	@echo "✅ Serviços de produção iniciados!"
