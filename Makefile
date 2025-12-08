@@ -80,9 +80,11 @@ prod-build:
 		cp frontend/.env.production.example frontend/.env.production; \
 		echo "⚠️  IMPORTANTE: Edite frontend/.env.production com suas configurações de produção!"; \
 	fi
-	@echo "📝 Criando links simbólicos .env -> .env.production para docker-compose..."
-	@cd backend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
-	@cd frontend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
+	@echo "📝 Carregando variáveis de ambiente dos arquivos .env.production..."
+	@set -a && \
+	. frontend/.env.production && \
+	. backend/.env.production && \
+	set +a && \
 	ENVIRONMENT=production docker compose build
 	@echo "✅ Build de produção concluído!"
 
@@ -102,6 +104,11 @@ prod-up:
 	@echo "📝 Criando links simbólicos .env -> .env.production para docker-compose..."
 	@cd backend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
 	@cd frontend && ([ ! -e .env ] || [ -L .env ]) && rm -f .env && ln -sf .env.production .env || true
+	@echo "📝 Carregando variáveis de ambiente dos arquivos .env.production..."
+	@set -a && \
+	. frontend/.env.production && \
+	. backend/.env.production && \
+	set +a && \
 	ENVIRONMENT=production docker compose up -d
 	@echo "✅ Serviços de produção iniciados!"
 
