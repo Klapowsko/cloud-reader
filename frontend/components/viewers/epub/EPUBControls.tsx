@@ -23,16 +23,16 @@ export default function EPUBControls({
 }: EPUBControlsProps) {
   return (
     <ViewerControls onPrev={onPrev} onNext={onNext} isLoading={isLoading} error={error}>
-      <span className="px-4 py-2 text-sm font-medium text-gray-700">
+      <span className="px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
         {error ? 'Erro' : isLoading ? 'Carregando...' : currentProgress > 0 ? `${Math.round(currentProgress)}%` : 'Pronto'}
       </span>
       {hasChapters && (
         <button
           onClick={onToggleChapters}
-          className="ml-4 btn btn-outline-primary"
+          className="ml-2 md:ml-4 btn btn-outline-primary p-2 md:p-1"
           title="Mostrar capítulos"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>

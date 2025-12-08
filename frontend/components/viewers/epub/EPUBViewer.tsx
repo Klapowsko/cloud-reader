@@ -88,15 +88,15 @@ export default function EPUBViewer({
 
       <div
         className={`flex-1 overflow-hidden bg-gray-100 relative transition-all duration-300 ${
-          showChapters ? 'ml-64' : ''
+          showChapters ? 'md:ml-64' : ''
         }`}
-        style={{ minHeight: '600px' }}
+        style={{ minHeight: '400px' }}
       >
         <div
           ref={viewerRef}
           className="w-full h-full"
           style={{
-            minHeight: '600px',
+            minHeight: '400px',
             height: '100%',
             width: '100%',
             position: 'relative',

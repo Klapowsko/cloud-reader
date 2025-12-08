@@ -111,8 +111,8 @@ export default function PDFViewer({
       />
 
       <div
-        className={`flex-1 overflow-auto bg-gray-100 p-4 ${
-          showOutline ? 'ml-64' : ''
+        className={`flex-1 overflow-auto bg-gray-100 p-2 md:p-4 ${
+          showOutline ? 'md:ml-64' : ''
         } transition-all duration-300`}
       >
         {pdf && (
